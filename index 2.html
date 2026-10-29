@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Peluang Masuk — Dashboard</title>
+<style>
+:root{--pink:#cf3c69;--pink2:#f4b9ce;--blush:#fff0f4;--cream:#fffaf0;--ink:#48332f;--muted:#8b7169;--green:#6f9148;--line:#e7d1b8;--blue:#e7f0ff}
+*{box-sizing:border-box}body{margin:0;background:var(--blush);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+header{background:linear-gradient(100deg,#fff0e2,#fff9e9);border-bottom:4px solid var(--pink);padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.brand{font-size:25px;font-weight:850;color:var(--pink)}.brand small{display:block;font-size:11px;letter-spacing:3px;color:var(--muted);font-weight:700}
+nav{display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-weight:700}nav span{cursor:pointer}
+.wrap{max-width:1450px;margin:auto;padding:22px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:13px}
+select,input,textarea{font:inherit;color:var(--ink);background:var(--cream);border:1.5px solid var(--line);border-radius:16px;padding:13px 15px;outline:none;min-width:0}
+select{cursor:pointer}input:focus,textarea:focus,select:focus{border-color:var(--pink)}
+.filter{border-radius:30px;font-weight:650}
+.search{width:100%;font-size:16px;padding:16px 18px;margin-bottom:18px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+.stat{background:#fffdf8;border:1px solid var(--line);border-radius:18px;padding:13px 18px;min-width:125px;box-shadow:0 3px 0 #f3dfe2}
+.stat strong{display:block;font-size:24px;color:var(--pink)}.stat span{font-size:12px;color:var(--muted);font-weight:700}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:18px;align-items:start}
+.feed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{background:#fffdf8;border:2px solid var(--pink2);border-radius:27px;padding:20px;box-shadow:0 8px 0 #f4c6d4;min-width:0}
+.card.done{border-color:#dfd0ad;box-shadow:0 8px 0 #efe2e3}
+.top{display:flex;gap:11px;align-items:center}.avatar{width:47px;height:47px;border-radius:50%;background:#f8dce6;display:grid;place-items:center;font-size:21px;border:2px solid #ead3c0;flex-shrink:0}
+.person{min-width:0;flex:1}.person b{font-size:17px}.handle{color:var(--muted);font-size:13px;margin-top:3px}.status{font-size:12px;font-weight:800;padding:8px 12px;border-radius:25px;background:#fff5d9;border:1px solid #e5cc83;white-space:nowrap}.status.done{background:var(--blue);border-color:#c5d6f0;color:#35547b}
+.tags{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.tag{padding:7px 12px;border-radius:22px;background:#edf4e7;color:#42673b;font-size:13px;font-weight:800}.tag.intent{background:#fff0e4;color:#bd304a}
+.post{font-size:17px;line-height:1.55;overflow-wrap:anywhere;margin:12px 0}.meta{font-size:13px;color:var(--muted);margin:12px 0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px dashed #dfc8ac;padding-bottom:12px;margin-bottom:12px}
+button{font:inherit;cursor:pointer;border:1.5px solid var(--line);border-radius:13px;background:var(--cream);color:var(--ink);padding:10px 12px;font-weight:750}
+button.primary{background:var(--pink);color:white;border-color:var(--pink);box-shadow:0 4px 0 #9f2d4b}
+button.green{border:2px solid var(--green);box-shadow:0 3px 0 #b9d18c}
+button:hover{filter:brightness(.98)}.controls{display:flex;gap:8px;flex-wrap:wrap}.controls select{flex:1;padding:10px}
+.side{background:#fffdf8;border:1.5px solid var(--line);border-radius:22px;padding:18px;position:sticky;top:12px}
+.side h2{font-size:19px;margin:0 0 14px}.side label{display:block;font-size:13px;font-weight:750;margin:12px 0 6px}.side input,.side textarea,.side select{width:100%}.side textarea{min-height:110px;resize:vertical}.side .primary{width:100%;margin-top:13px}
+.note{font-size:12px;line-height:1.5;color:var(--muted);margin-top:12px}
+.empty{grid-column:1/-1;text-align:center;padding:45px 15px;color:var(--muted);background:#fffaf0;border:1px dashed var(--line);border-radius:20px}
+.hidden{display:none!important}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.side{position:static;order:-1}.feed{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.wrap{padding:13px}.feed{grid-template-columns:1fr}.card{padding:16px}header{padding:15px}.brand{font-size:22px}nav{gap:12px;font-size:13px}.stat{flex:1;min-width:calc(50% - 10px)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Peluang Masuk.<small>DASHBOARD CALON CUSTOMER</small></div>
+  <nav><span onclick="setStatus('Semua')">Home</span><span onclick="document.querySelector('#q').focus()">Cari peluang</span><span onclick="showBookmarks()">♡ Bookmark</span><button class="primary" onclick="exportCSV()">↓ Ekspor CSV</button></nav>
+</header>
+<main class="wrap">
+  <div class="toolbar">
+    <select id="productFilter" class="filter" aria-label="Filter aplikasi" onchange="render()"><option value="">📱 Semua aplikasi</option><option>Netflix</option><option>CapCut</option><option>Disney+</option><option>Spotify</option><option>Gemini</option><option>Lainnya</option></select>
+    <select id="intentFilter" class="filter" aria-label="Filter kata kunci" onchange="render()"><option value="">🔑 Semua kata kunci</option><option value="mencari produk">mencari produk</option><option value="mau beli">mau beli</option><option value="harga">harga</option><option value="butuh">butuh</option></select>
+    <select id="dateFilter" class="filter" aria-label="Filter tanggal" onchange="render()"><option value="all">🗓️ Semua tanggal</option><option value="today">Hari ini</option><option value="week">7 hari terakhir</option></select>
+    <select id="statusFilter" class="filter" aria-label="Filter status" onchange="render()"><option value="Semua">Semua status</option><option value="Baru">Baru</option><option value="Ditindaklanjuti">Ditindaklanjuti</option><option value="Selesai">Selesai</option><option value="Diabaikan">Diabaikan</option><option value="Bookmark">Bookmark</option></select>
+  </div>
+  <input id="q" class="search" placeholder="⌕  Cari username, isi postingan, atau aplikasi..." oninput="render()">
+  <div class="stats">
+    <div class="stat"><span>Total peluang</span><strong id="total">0</strong></div>
+    <div class="stat"><span>Baru</span><strong id="newCount">0</strong></div>
+    <div class="stat"><span>Ditindaklanjuti</span><strong id="followCount">0</strong></div>
+    <div class="stat"><span>Bookmark</span><strong id="bookCount">0</strong></div>
+  </div>
+  <div class="layout">
+    <section id="feed" class="feed"></section>
+    <aside class="side">
+      <h2>＋ Tambah peluang</h2>
+      <form id="addForm">
+        <label for="name">Nama / username</label><input id="name" placeholder="contoh: @username" required>
+        <label for="product">Produk</label><select id="product"><option>Netflix</option><option>CapCut</option><option>Disney+</option><option>Spotify</option><option>Gemini</option><option>Lainnya</option></select>
+        <label for="intent">Kata kunci / kebutuhan</label><select id="intent"><option>mencari produk</option><option>mau beli</option><option>harga</option><option>butuh</option></select>
+        <label for="post">Isi postingan</label><textarea id="post" placeholder="Tempel isi tweet di sini..." required></textarea>
+        <label for="link">Link tweet (opsional)</label><input id="link" type="url" placeholder="https://x.com/...">
+        <button class="primary" type="submit">Simpan peluang</button>
+      </form>
+      <div class="note">Versi gratis: data tersimpan di browser/perangkat ini. Masukkan peluang secara manual. Tweet tidak diambil otomatis dari X/Twitter.</div>
+    </aside>
+  </div>
+</main>
+<script>
+const KEY='peluangMasukDashboardV2';
+let items=[];
+try{items=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){items=[]}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function persist(){localStorage.setItem(KEY,JSON.stringify(items));render()}
+function setStatus(s){document.querySelector('#statusFilter').value=s;render()}
+function showBookmarks(){setStatus('Bookmark')}
+function render(){
+ const q=document.querySelector('#q').value.trim().toLowerCase(), product=document.querySelector('#productFilter').value, intent=document.querySelector('#intentFilter').value, date=document.querySelector('#dateFilter').value, status=document.querySelector('#statusFilter').value;
+ document.querySelector('#total').textContent=items.length;
+ document.querySelector('#newCount').textContent=items.filter(x=>x.status==='Baru').length;
+ document.querySelector('#followCount').textContent=items.filter(x=>x.status==='Ditindaklanjuti').length;
+ document.querySelector('#bookCount').textContent=items.filter(x=>x.bookmark).length;
+ let list=items.filter(x=>{
+  const hay=(x.name+' '+x.product+' '+x.intent+' '+x.post+' '+x.link).toLowerCase();
+  const age=(Date.now()-x.created)/86400000;
+  return (!q||hay.includes(q))&&(!product||x.product===product)&&(!intent||x.intent===intent)&&(date==='all'||(date==='today'?age<1:age<7))&&(status==='Semua'||(status==='Bookmark'?x.bookmark:x.status===status));
+ }).sort((a,b)=>b.created-a.created);
+ const feed=document.querySelector('#feed');
+ if(!list.length){feed.innerHTML='<div class="empty">Belum ada peluang yang cocok.<br>Tambahkan peluang lewat formulir di samping.</div>';return}
+ feed.innerHTML=list.map(x=>`<article class="card ${x.status==='Selesai'?'done':''}">
+ <div class="top"><div class="avatar">${esc((x.name.replace('@','')[0]||'?').toUpperCase())}</div><div class="person"><b>${esc(x.name)}</b><div class="handle">${esc(x.name.startsWith('@')?x.name:'@'+x.name)} · ${esc(timeAgo(x.created))}</div></div><span class="status ${x.status==='Selesai'?'done':''}">${esc(x.status)}</span></div>
+ <div class="tags"><span class="tag">${esc(x.product)}</span><span class="tag intent">${esc(x.intent)}</span></div>
+ <div class="post">${esc(x.post)}</div><div class="meta">dicatat ${new Date(x.created).toLocaleString('id-ID',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+ <div class="actions"><button class="primary" onclick="copyTemplate(${x.id})">Balas pakai template</button>${x.link?`<button class="green" onclick="window.open('${esc(x.link)}','_blank','noopener')">Buka tweet ↗</button>`:''}<button onclick="copyText(${x.id})">▤ Salin postingan</button><button onclick="toggleBookmark(${x.id})">${x.bookmark?'♥ Tersimpan':'♡ Bookmark'}</button></div>
+ <div class="controls"><select aria-label="Status peluang" onchange="changeStatus(${x.id},this.value)">${['Baru','Ditindaklanjuti','Selesai','Diabaikan'].map(s=>`<option ${x.status===s?'selected':''}>${s}</option>`).join('')}</select><button onclick="changeStatus(${x.id},'Ditindaklanjuti')">✅ Tandai ditindaklanjuti</button><button onclick="changeStatus(${x.id},'Diabaikan')">🙈 Abaikan</button><button onclick="removeItem(${x.id})">Hapus</button></div>
+ </article>`).join('');
+}
+function timeAgo(t){let m=Math.max(0,Math.floor((Date.now()-t)/60000));if(m<1)return'baru saja';if(m<60)return m+' menit lalu';let h=Math.floor(m/60);if(h<24)return h+' jam lalu';return Math.floor(h/24)+' hari lalu'}
+document.querySelector('#addForm').addEventListener('submit',e=>{e.preventDefault();items.push({id:Date.now()+Math.floor(Math.random()*1000),name:document.querySelector('#name').value.trim(),product:document.querySelector('#product').value,intent:document.querySelector('#intent').value,post:document.querySelector('#post').value.trim(),link:document.querySelector('#link').value.trim(),status:'Baru',bookmark:false,created:Date.now()});persist();e.target.reset();document.querySelector('#statusFilter').value='Semua';});
+function changeStatus(id,status){let x=items.find(i=>i.id===id);if(x){x.status=status;persist()}}
+function toggleBookmark(id){let x=items.find(i=>i.id===id);if(x){x.bookmark=!x.bookmark;persist()}}
+function removeItem(id){if(confirm('Hapus peluang ini?')){items=items.filter(i=>i.id!==id);persist()}}
+function copyText(id){let x=items.find(i=>i.id===id);if(x)navigator.clipboard.writeText(x.post).then(()=>alert('Postingan disalin.')).catch(()=>prompt('Salin teks ini:',x.post))}
+function copyTemplate(id){let x=items.find(i=>i.id===id);if(x){let t=`Halo kak, masih mencari ${x.product}? Aku ready yaa. Kalau berminat, boleh chat aku untuk info durasi dan harga 😊`;navigator.clipboard.writeText(t).then(()=>alert('Template balasan disalin.')).catch(()=>prompt('Salin template ini:',t))}}
+function exportCSV(){let rows=[['username','produk','kata_kunci','postingan','link','status','bookmark','waktu'],...items.map(x=>[x.name,x.product,x.intent,x.post,x.link,x.status,x.bookmark?'ya':'tidak',new Date(x.created).toISOString()])];let csv=rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');let blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='peluang-masuk.csv';a.click();URL.revokeObjectURL(url)}
+render();
+</script>
+</body>
+</html>
